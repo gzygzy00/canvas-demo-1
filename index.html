@@ -39,8 +39,11 @@
       let ctx = canvas.getContext("2d");
 
       let painting = false;
+      let last;
       ctx.fillStyle = "black";
       ctx.strokeStyle = "none";
+      ctx.lineWidth = 6;
+      ctx.lineCap = "round";
 
       let drawCircle = e => {
         ctx.beginPath();
@@ -49,8 +52,16 @@
         ctx.fill();
       };
 
-      canvas.onmousedown = () => {
+      let drawLine = (x1, y1, x2, y2) => {
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+      };
+
+      canvas.onmousedown = e => {
         painting = true;
+        last = [e.clientX, e.clientY];
       };
 
       canvas.onmouseup = () => {
@@ -58,14 +69,19 @@
       };
 
       if (isTouchDevice) {
+        canvas.ontouchstart = e => {
+          last = [e.touches[0].clientX, e.touches[0].clientY];
+        };
         canvas.ontouchmove = e => {
           let p = e.touches[0];
-          drawCircle(p);
+          drawLine(last[0], last[1], p.clientX, p.clientY);
+          last = [p.clientX, p.clientY];
         };
       } else {
         canvas.onmousemove = e => {
           if (painting === true) {
-            drawCircle(e);
+            drawLine(last[0], last[1], e.clientX, e.clientY);
+            last = [e.clientX, e.clientY];
           }
         };
       }
